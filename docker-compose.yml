@@ -1,0 +1,86 @@
+# Mongo + Redis always. Celery optional via profiles (classic blue / green).
+#
+# Steady state:  docker compose --profile celery up -d  → beat + green only.
+# Cutover sim:   add --profile celery-blue, then: docker compose stop -t 120 celery-worker-blue
+#
+# Optional: create `.env` next to this file with:
+#   APP_RELEASE_GREEN=03
+#   APP_RELEASE_BLUE=02
+
+services:
+  mongodb:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  celery-beat:
+    profiles: [celery]
+    image: full-stack-data-celery:${CELERY_BEAT_TAG:-beat}
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        APP_RELEASE: ${CELERY_BEAT_RELEASE:-beat}
+    command: celery -A celery_app beat --loglevel=info
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      MONGODB_URL: mongodb://mongodb:27017
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  celery-worker-green:
+    profiles: [celery]
+    image: full-stack-data-celery:${CELERY_GREEN_TAG:-green}
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        APP_RELEASE: ${APP_RELEASE_GREEN:-next}
+    command: >
+      celery -A celery_app worker
+      --loglevel=info
+      --hostname=green@%h
+      --concurrency=2
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      MONGODB_URL: mongodb://mongodb:27017
+      DEPLOYMENT_COHORT: green
+      APP_RELEASE: ${APP_RELEASE_GREEN:-next}
+    depends_on:
+      - redis
+    stop_grace_period: 120s
+    restart: unless-stopped
+
+  celery-worker-blue:
+    profiles: [celery-blue]
+    image: full-stack-data-celery:${CELERY_BLUE_TAG:-blue}
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        APP_RELEASE: ${APP_RELEASE_BLUE:-previous}
+    command: >
+      celery -A celery_app worker
+      --loglevel=info
+      --hostname=blue@%h
+      --concurrency=2
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      MONGODB_URL: mongodb://mongodb:27017
+      DEPLOYMENT_COHORT: blue
+      APP_RELEASE: ${APP_RELEASE_BLUE:-previous}
+    depends_on:
+      - redis
+    stop_grace_period: 120s
+    restart: unless-stopped
+
+volumes:
+  mongo_data:

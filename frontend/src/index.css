@@ -1,0 +1,78 @@
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: #0b0b0f;
+  color: #e8e8ed;
+  min-height: 100vh;
+}
+#root {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+h1 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem;
+}
+.sub {
+  color: #8b8b9a;
+  font-size: 0.875rem;
+  margin-bottom: 1.5rem;
+}
+label {
+  display: block;
+  font-size: 0.8rem;
+  color: #a8a8b8;
+  margin-bottom: 0.35rem;
+}
+input {
+  width: 100%;
+  padding: 0.55rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid #2a2a36;
+  background: #14141c;
+  color: #f4f4f8;
+  margin-bottom: 1rem;
+}
+input:focus {
+  outline: 2px solid #e50914;
+  border-color: transparent;
+}
+button[type="submit"] {
+  width: 100%;
+  padding: 0.65rem;
+  border: none;
+  border-radius: 8px;
+  background: #e50914;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 0.25rem;
+}
+button[type="submit"]:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.msg {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+}
+.msg.ok {
+  background: #132a1a;
+  color: #8fefa8;
+}
+.msg.err {
+  background: #2a1313;
+  color: #ff8a8a;
+}
+.hint {
+  font-size: 0.75rem;
+  color: #6c6c7a;
+  margin: -0.75rem 0 1rem;
+}
