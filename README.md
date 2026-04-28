@@ -1,5 +1,27 @@
 # full-stack-data-app — schedules
+## How it works (data flow)
 
+```text
+Browser form
+  → FastAPI saves a row in MongoDB (“schedule”)
+       ↓
+FastAPI scheduler (every ~30s)
+  → For each row that is “active” (between start/end dates)
+    and “due” (next_run ≤ now)
+  → Pushes one JSON blob onto a Redis list (full_stack:due_jobs)
+    and updates next_run in Mongo (next cron time)
+       ↓
+Celery beat (every ~10s)
+  → Tells workers to run drain_redis_queue
+       ↓
+Celery worker(s)
+  → LPOP from that same Redis list
+  → For each message, runs process_schedule_job (prints/logs the name)
+```
+
+MongoDB holds **schedule definitions**; the Redis list is a short **queue of fired jobs**; Celery **consumes** that queue. Intervals come from `SCHEDULER_INTERVAL_SECONDS` and `CELERY_BEAT_INTERVAL_SECONDS` in `.env` / `backend/.env` (see `.env.example`).
+
+---
 ## Run MongoDB + Redis
 
 From this folder:
