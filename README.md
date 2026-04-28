@@ -1,13 +1,5 @@
 # full-stack-data-app — schedules
 
-Project folder: **full-stack-data-app** (can live anywhere you keep it).
-
-## Open in Cursor
-
-**File → Open Folder…** → choose:
-
-`/path/to/full-stack-data-app`
-
 ## Run MongoDB + Redis
 
 From this folder:
