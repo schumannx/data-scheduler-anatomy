@@ -5,12 +5,6 @@ A production-inspired **distributed job scheduling system** designed to **decoup
 ---
 ## Why This Project
 
-Modern data platforms require:
-
-- Reliable scheduling of large volumes of jobs  
-- Decoupled and fault-tolerant execution systems  
-- Horizontally scalable worker architecture  
-
 This project demonstrates real-world backend patterns:
 
 - Queue-based orchestration (Redis)
