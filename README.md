@@ -1,27 +1,83 @@
-# full-stack-data-app — schedules
+# 🚀 Full Stack Data App — Distributed Job Scheduling System
 
-## How it works (data flow)
+A production-inspired **distributed job scheduling system** designed to **decouple job definition, scheduling, and execution into independently scalable components**.
+
+---
+## Why This Project
+
+Modern data platforms require:
+
+- Reliable scheduling of large volumes of jobs  
+- Decoupled and fault-tolerant execution systems  
+- Horizontally scalable worker architecture  
+
+This project demonstrates real-world backend patterns:
+
+- Queue-based orchestration (Redis)
+- Distributed execution (Celery workers)
+- Stateless scheduling (FastAPI scheduler loop)
+- Safe deployment strategies (Blue/Green)
+---
+
+## Architecture Overview
+
+### System Design
+
+![Distributed Job Scheduling](images/Scheduling_System.png)
+
+The system is designed with clear separation of concerns:
+
+- **Definition Layer** → user submits jobs via UI  
+- **Scheduling Layer** → determines *when* jobs should run  
+- **Execution Layer** → performs the actual work  
+
+This separation enables independent scaling and better fault isolation.
+
+---
+
+### 🔁 Blue / Green Deployment Strategy
+
+![Blue Green Deployment](images/Release.png)
+
+To support **zero-downtime deployments**, Celery workers are organized into **Blue/Green pools**:
+
+- Only **one pool is active** at a time  
+- New releases are deployed to the **idle pool**  
+- Traffic switches via Redis queue consumption  
+- Old workers are drained and safely terminated  
+
+✔ Zero downtime  
+✔ Safe rollback  
+✔ Production-ready deployment pattern  
+---
+
+## Tech Stack
+
+- React + Vite — UI for job creation  
+- FastAPI — API + scheduling engine  
+- MongoDB — persistent job definitions  
+- Redis — lightweight job queue  
+- Celery — distributed task execution  
+
+---
+
+## ⚙️ How It Works (Data Flow)
 
 ```text
-Browser form
-  → FastAPI saves a row in MongoDB (“schedule”)
+Browser (React Form)
+  → FastAPI saves schedule → MongoDB
        ↓
-FastAPI scheduler (every ~30s)
-  → For each row that is “active” (between start/end dates)
-    and “due” (next_run ≤ now)
-  → Pushes one JSON blob onto a Redis list (full_stack:due_jobs)
-    and updates next_run in Mongo (next cron time)
+FastAPI Scheduler (every ~30s)
+  → Finds "active + due" jobs
+  → Pushes JSON payload → Redis queue
+  → Updates next_run in MongoDB
        ↓
-Celery beat (every ~10s)
-  → Tells workers to run drain_redis_queue
+Celery Beat (every ~10s)
+  → Triggers queue draining
        ↓
-Celery worker(s)
-  → LPOP from that same Redis list
-  → For each message, runs process_schedule_job (prints/logs the name)
-```
-
-MongoDB holds **schedule definitions**; the Redis list is a short **queue of fired jobs**; Celery **consumes** that queue. Intervals come from `SCHEDULER_INTERVAL_SECONDS` and `CELERY_BEAT_INTERVAL_SECONDS` in `.env` / `backend/.env` (see `.env.example`).
-
+Celery Workers
+  → LPOP from Redis queue
+  → Execute job (process_schedule_job)
 ---
 
 ## Run MongoDB + Redis
