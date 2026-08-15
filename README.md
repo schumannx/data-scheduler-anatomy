@@ -72,6 +72,8 @@ Celery Beat (every ~10s)
 Celery Workers
   → LPOP from Redis queue
   → Execute job (process_schedule_job)
+```
+
 ---
 
 ## Run MongoDB + Redis
