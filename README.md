@@ -1,16 +1,22 @@
-# 🚀 Full Stack Data App — Distributed Job Scheduling System
+# Data Scheduler Anatomy
 
-A production-inspired **distributed job scheduling system** designed to **decouple job definition, scheduling, and execution into independently scalable components**.
+### A runnable, readable breakdown of how data jobs get scheduled — from cron expression to worker execution
+
+Every data platform has a scheduler at its core, and most of them are too large to read. This one is deliberately small: the whole path from *"a job is due"* to *"a worker ran it"* is under 400 lines across seven files.
+
+It splits that path into the three layers every real scheduler has — **definition**, **scheduling**, and **execution** — and runs them as separate processes, so you can kill one and watch what the others do.
 
 ---
-## Why This Project
+## What You'll Actually See
 
-This project demonstrates real-world backend patterns:
+- **The queue is just a Redis list.** No abstraction to see through — `RPUSH` on one side, `LPOP` on the other. Watch jobs move with `redis-cli LLEN` while the system runs.
 
-- Queue-based orchestration (Redis)
-- Distributed execution (Celery workers)
-- Stateless scheduling (FastAPI scheduler loop)
-- Safe deployment strategies (Blue/Green)
+- **Scheduling is decoupled from execution.** The FastAPI loop decides *when*; it never runs anything. Stop the workers and jobs pile up in Redis instead of vanishing.
+
+- **Zero-downtime deploys, demonstrated.** Two Celery worker pools (blue/green) consume the same queue. Bring up the new one, drain the old, no job dropped. Most demos skip this entirely.
+
+- **Where it stops — on purpose.** The scheduler runs as a single instance with no distributed lock, so the find-then-update in [`scheduler_service.py`](backend/scheduler_service.py) will double-fire if you run two. That's the exact seam where production schedulers add leader election, and it's easier to understand here, where you can see the race.
+
 ---
 
 ## Architecture Overview

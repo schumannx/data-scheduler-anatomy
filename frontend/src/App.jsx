@@ -72,7 +72,7 @@ export default function App() {
   return (
     <>
       <h1>Schedule job</h1>
-      <p className="sub">Full stack data · stored in MongoDB · due runs pushed to Redis</p>
+      <p className="sub">Definition layer · stored in MongoDB · due runs pushed to Redis</p>
       <form onSubmit={onSubmit}>
         <label htmlFor="name">Name</label>
         <input
