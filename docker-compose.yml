@@ -22,7 +22,7 @@ services:
 
   celery-beat:
     profiles: [celery]
-    image: full-stack-data-celery:${CELERY_BEAT_TAG:-beat}
+    image: scheduler-anatomy-celery:${CELERY_BEAT_TAG:-beat}
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -38,7 +38,7 @@ services:
 
   celery-worker-green:
     profiles: [celery]
-    image: full-stack-data-celery:${CELERY_GREEN_TAG:-green}
+    image: scheduler-anatomy-celery:${CELERY_GREEN_TAG:-green}
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -61,7 +61,7 @@ services:
 
   celery-worker-blue:
     profiles: [celery-blue]
-    image: full-stack-data-celery:${CELERY_BLUE_TAG:-blue}
+    image: scheduler-anatomy-celery:${CELERY_BLUE_TAG:-blue}
     build:
       context: ./backend
       dockerfile: Dockerfile
