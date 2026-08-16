@@ -2,20 +2,9 @@
 
 ### A runnable, readable breakdown of how data jobs get scheduled — from cron expression to worker execution
 
-Every data platform has a scheduler at its core, and most of them are too large to read. This one is deliberately small: the whole path from *"a job is due"* to *"a worker ran it"* is under 400 lines across seven files.
+Every data platform has a scheduler at its core, and most of them are too large to read.
 
-It splits that path into the three layers every real scheduler has — **definition**, **scheduling**, and **execution** — and runs them as separate processes, so you can kill one and watch what the others do.
-
----
-## What You'll Actually See
-
-- **The queue is just a Redis list.** No abstraction to see through — `RPUSH` on one side, `LPOP` on the other. Watch jobs move with `redis-cli LLEN` while the system runs.
-
-- **Scheduling is decoupled from execution.** The FastAPI loop decides *when*; it never runs anything. Stop the workers and jobs pile up in Redis instead of vanishing.
-
-- **Zero-downtime deploys, demonstrated.** Two Celery worker pools (blue/green) consume the same queue. Bring up the new one, drain the old, no job dropped. Most demos skip this entirely.
-
-- **Where it stops — on purpose.** The scheduler runs as a single instance with no distributed lock, so the find-then-update in [`scheduler_service.py`](backend/scheduler_service.py) will double-fire if you run two. That's the exact seam where production schedulers add leader election, and it's easier to understand here, where you can see the race.
+This one traces the whole path from *"a job is due"* to *"a worker ran it"* across the three layers every real scheduler has — **definition**, **scheduling**, and **execution** — running each as a separate process, so you can kill one and watch what the others do.
 
 ---
 
